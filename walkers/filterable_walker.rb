@@ -2,6 +2,8 @@ require_relative 'base_walker'
 
 # Smart walker class
 class FilterableWalker < BaseWalker
+  attr_reader :stop_criteria, :accept_criteria
+
   def stop_when(&block)
     @stop_criteria = block
     self
@@ -13,9 +15,9 @@ class FilterableWalker < BaseWalker
   end
 
   def walk(from, to)
-    raise_stop_message unless @stop_criteria
-    raise_accept_message unless @accept_criteria
-    super(from, to).uniq
+    raise_stop_message unless stop_criteria
+    raise_accept_message unless accept_criteria
+    super(from, to)
   end
 
   def raise_stop_message
@@ -27,12 +29,11 @@ class FilterableWalker < BaseWalker
   end
 
   def stop_condition(from, to, current)
-    @stop_criteria.call(from, to, current)
+    stop_criteria.call(from, to, current)
   end
 
   def postprocess(from, to, current)
-    return nil unless @accept_criteria.call(from, to, current)
+    return nil unless accept_criteria.call(from, to, current)
     current
   end
-
 end

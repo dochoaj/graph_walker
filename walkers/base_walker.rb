@@ -11,9 +11,10 @@ class BaseWalker
     current = { path: [from], distance: 0 }
 
     explore_paths(from, to, current) { |f, t, c| stop_condition(f, t, c) }
+      .uniq
   end
 
-  def postprocess(from, to, current)
+  def postprocess(_from, _to, _current)
     raise 'This must be implemented'
   end
 

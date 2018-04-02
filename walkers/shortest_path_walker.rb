@@ -13,7 +13,7 @@ class ShortestPathWalker < BaseWalker
     ensure_goal(to, current) && current[:path].count > 1
   end
 
-  def postprocess(from, to, current)
+  def postprocess(_from, _to, current)
     current
   end
 end
