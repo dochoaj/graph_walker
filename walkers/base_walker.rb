@@ -1,50 +1,42 @@
-class BaseWalker
+require_relative 'abstract_walker'
+
+class BaseWalker < AbstractWalker
   attr_reader :graph
 
-  def initialize(graph)
-    @graph = graph
+  def walk(from, to)
+    from = from.to_sym
+    to = to.to_sym
+    current = { path: [from], distance: 0 }
+
+    explore_paths(from, to, current) { |f, t, c| stop_condition(f, t, c) }
   end
 
-  def perform
-    raise 'This must be implemented'
+  def pick_intermediate_path(from, to, current)
+    pick_condition = ensure_goal(to, current) && current[:path].count > 1
+    pick_condition ? [postprocess(from, to, current)] : []
   end
 
-  def postprocess
-    raise 'This must be implemented'
-  end
-
-  def explore_paths(from, goal, current)
-    paths = pick_intermediate_path(current, goal)
-    return postprocess(current, from, goal) if yield(from, goal, current)
+  def explore_paths(from, to, current)
+    paths = pick_intermediate_path(from, to, current)
+    return postprocess(from, to, current) if yield(from, to, current)
     available_routes = available_routes(from, reject_nodes(current))
-    walked_paths = available_routes.map do |node, length|
-      new_meta = update_current(node, length, current)
-      explore_paths(node, goal, new_meta) do |xfrom, xgoal, xmeta|
-        stop_condition(xfrom, xgoal, xmeta)
-      end
+    walked_paths = available_routes.map do |node, distance|
+      new_current = update_current(node, distance, current)
+      explore_paths(node, to, new_current) { |f, t, c| stop_condition(f, t, c) }
     end
 
     walked_paths.concat(paths).compact.flatten
   end
 
-  def ensure_goal(to, current)
-    current[:path].last == to
-  end
-
-  def update_current(node, length, current)
+  def update_current(node, distance, current)
     {
       path: current[:path].dup << node,
-      length: current[:length] + length
+      distance: current[:distance] + distance
     }
   end
 
-  def pick_intermediate_path(current, to)
-    pick_condition = ensure_goal(to, current) && current[:path].count > 1
-    pick_condition ? [current] : []
-  end
-
-  def reject_nodes(current)
-    current[:path]
+  def reject_nodes(_current)
+    []
   end
 
   def available_routes(node, rejection)
@@ -57,13 +49,7 @@ class BaseWalker
     routes
   end
 
-  def from_to_distance(from, to)
-    start = graph[from.to_sym]
-    raise 'No city' unless start
-
-    destination = start[to.to_sym]
-    raise 'No route' unless destination
-
-    destination
+  def ensure_goal(to, current)
+    current[:path].last == to
   end
 end

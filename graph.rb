@@ -10,33 +10,33 @@ graph = {
   :E => { 'A': nil, 'B': 3, 'C': nil, 'D': nil, 'E': 0 }
 }
 
-walk = DefinedPathWalker.new(graph)
-puts walk.perform('A-B-C')
-puts walk.perform('A-D')
-puts walk.perform('A-D-C')
-puts walk.perform('A-E-B-C-D')
-puts walk.perform('A-E-D')
+walker = DefinedPathWalker.new(graph)
+puts walker.walk('A-B-C')
+puts walker.walk('A-D')
+puts walker.walk('A-D-C')
+puts walker.walk('A-E-B-C-D')
+puts walker.walk('A-E-D')
 puts '-----------------------'
 walker = FilterableWalker.new(graph)
-puts walker.path_for('C', 'C')
+puts walker
       .stop_when{ |f, t, c| c[:path].count > 4 }
       .accept_when { |f, t, c| c[:path].count.between?(1, 4) && c[:path].last == t }
-      .walk
+      .walk('C', 'C')
 puts '-----------------------'
-puts walker.path_for('A', 'C')
+puts walker
       .stop_when{ |f, t, c| c[:path].count > 5 }
       .accept_when { |f, t, c| c[:path].count == 5 && c[:path].last == t }
-      .walk
+      .walk('A', 'C')
 puts '-----------------------'
-walk = ShortestPathWalker.new(graph)
-puts walk.perform('A', 'C')
+walker = ShortestPathWalker.new(graph)
+puts walker.walk('A', 'C')
 puts '-----------------------'
-puts walk.perform('B', 'B')
+puts walker.walk('B', 'B')
 puts '-----------------------'
 walker = FilterableWalker.new(graph)
-puts walker.path_for('C', 'C')
+puts walker
       .stop_when{ |f, t, c| c[:distance] >= 30 }
       .accept_when { |f, t, c| c[:distance] < 30 && c[:path].last == t }
-      .walk
+      .walk('C', 'C')
 puts '-----------------------'
 
