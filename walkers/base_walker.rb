@@ -1,7 +1,9 @@
-require_relative 'abstract_walker'
-
-class BaseWalker < AbstractWalker
+class BaseWalker
   attr_reader :graph
+
+  def initialize(graph)
+    @graph = graph
+  end
 
   def walk(from, to)
     from = from.to_sym
@@ -9,6 +11,10 @@ class BaseWalker < AbstractWalker
     current = { path: [from], distance: 0 }
 
     explore_paths(from, to, current) { |f, t, c| stop_condition(f, t, c) }
+  end
+
+  def postprocess(from, to, current)
+    raise 'This must be implemented'
   end
 
   def pick_intermediate_path(from, to, current)
